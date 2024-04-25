@@ -41,3 +41,4 @@ jobs:
           personal_token: ${{ secrets.GHP_DEPLOY_TOKEN }}
           publish_dir: build
           force_orphan: true
+          allow_empty_commit: true
