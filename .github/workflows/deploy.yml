@@ -9,6 +9,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
     steps:
@@ -42,8 +44,8 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
         with:
-          personal_token: ${{ secrets.GHP_DEPLOY_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: build
           force_orphan: true
           allow_empty_commit: true
-          cname: ${{ env.PAGE_CNAME }}
+          cname: mypage.hbrown-test.com
