@@ -49,3 +49,16 @@ jobs:
           force_orphan: true
           allow_empty_commit: true
           cname: mypage.hbrown-test.com
+
+      - name: Enable Enforce HTTPS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          OWNER=$(echo $REPO | awk -F'/' '{print $1}')
+          REPO_NAME=$(echo $REPO | awk -F'/' '{print $2}')
+          curl -X PATCH \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/$OWNER/$REPO_NAME/pages \
+            -d '{"https_enforced": true}'
