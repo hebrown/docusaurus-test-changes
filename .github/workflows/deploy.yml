@@ -38,6 +38,8 @@ jobs:
         id: set-cname
         run: echo "PAGE_CNAME=$(echo '${{ github.repository }}' | awk -F'/' '{print $2}').hbrown-test.com" >> $GITHUB_ENV
 
+      - run: echo ${{ env.PAGE_CNAME }}
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
