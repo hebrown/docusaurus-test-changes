@@ -32,7 +32,6 @@ jobs:
           key: ${{ runner.os }}-website-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-website-
-
       - run: yarn install --frozen-lockfile
       - run: yarn build
 
@@ -48,4 +47,17 @@ jobs:
           publish_dir: build
           force_orphan: true
           allow_empty_commit: true
-          cname: mypage2.hbrown-test.com
+          cname: mypage.hbrown-test.com
+
+      - name: Enable Enforce HTTPS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GHP_DEPLOY_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          OWNER=$(echo $REPO | awk -F'/' '{print $1}')
+          REPO_NAME=$(echo $REPO | awk -F'/' '{print $2}')
+          curl -X PATCH \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/$OWNER/$REPO_NAME/pages \
+            -d '{"https_enforced": true}'
