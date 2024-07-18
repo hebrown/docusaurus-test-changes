@@ -47,7 +47,7 @@ jobs:
           publish_dir: build
           force_orphan: true
           allow_empty_commit: true
-          cname: mypage.hbrown-test.com
+          cname: mypage4.hbrown-test.com
 
       - name: Enable Enforce HTTPS
         env:
