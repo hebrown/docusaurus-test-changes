@@ -45,21 +45,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          OWNER=$(echo $REPO | awk -F'/' '{print $1}')
-          REPO_NAME=$(echo $REPO | awk -F'/' '{print $2}')
-          RESPONSE=$(curl -L -s -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$OWNER/$REPO_NAME/pages)
-          CNAME=$(echo $RESPONSE | jq -r '.cname')
-          HTTPS_ENFORCED=$(echo $RESPONSE | jq -r '.https_enforced')
-          if [ "$CNAME" != "null" ]; then
-            echo "CNAME_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "CNAME_EXISTS=false" >> $GITHUB_ENV
-          fi
-          if [ "$HTTPS_ENFORCED" == "true" ]; then
-            echo "HTTPS_ENFORCED=true" >> $GITHUB_ENV
-          else
-            echo "HTTPS_ENFORCED=false" >> $GITHUB_ENV
-          fi
+          RESPONSE=$(curl -L -s -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/${{ github.repository }}/pages)
+          echo "CNAME_EXISTS=$(echo $RESPONSE | jq -r '.cname != null')" >> $GITHUB_ENV
+          echo "HTTPS_ENFORCED=$(echo $RESPONSE | jq -r '.https_enforced')" >> $GITHUB_ENV
+
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
@@ -77,26 +66,21 @@ jobs:
           HTTPS_TOKEN: ${{ secrets.GHP_DEPLOY_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          OWNER=$(echo $REPO | awk -F'/' '{print $1}')
-          REPO_NAME=$(echo $REPO | awk -F'/' '{print $2}')
           MAX_RETRIES=30
           RETRY_INTERVAL=30
           for ((i=1; i<=MAX_RETRIES; i++)); do
             echo "Attempt $i to enforce HTTPS"
-            RESPONSE=$(curl -L -s -o response.json -w "%{http_code}" \
+            HTTP_STATUS=$(curl -L -s -o response.json -w "%{http_code}" \
               -X PUT \
-              -H "Authorization: token $HTTPS_TOKEN" \
+              -H "Authorization: Bearer $HTTPS_TOKEN" \
               -H "Accept: application/vnd.github+json" \
-              https://api.github.com/repos/$OWNER/$REPO_NAME/pages \
+              https://api.github.com/repos/${{ github.repository }}/pages \
               -d '{"https_enforced": true}')
-            HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
             if [[ "$HTTP_STATUS" == "204" ]]; then
               echo "HTTPS enforcement successful"
-              cat response.json
               break
             else
               echo "HTTPS enforcement failed with status $HTTP_STATUS. Retrying in $RETRY_INTERVAL seconds..."
-              cat response.json
               sleep $RETRY_INTERVAL
             fi
           done
