@@ -80,7 +80,7 @@ jobs:
           cname: mypage9.hbrown-test.com
 
       - name: Enable Enforce HTTPS
-        if: env.CNAME_EXISTS == 'false' && env.HTTPS_ENFORCED == 'false'
+        if: env.CNAME_EXISTS == 'false' || env.HTTPS_ENFORCED == 'false'
         env:
           HTTPS_TOKEN: ${{ secrets.GHP_DEPLOY_TOKEN }}
           REPO: ${{ github.repository }}
