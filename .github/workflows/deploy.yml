@@ -39,22 +39,7 @@ jobs:
         id: set-cname
         run: echo "PAGE_CNAME=$(echo '${{ github.repository }}' | awk -F'/' '{print $2}').hbrown-test.com" >> $GITHUB_ENV
 
-      - name: Check if CNAME exists
-        id: check-cname
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-        run: |
-          OWNER=$(echo $REPO | awk -F'/' '{print $1}')
-          REPO_NAME=$(echo $REPO | awk -F'/' '{print $2}')
-          CNAME_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$OWNER/$REPO_NAME/contents/CNAME)
-          if [ "$CNAME_EXISTS" == "200" ]; then
-            echo "CNAME_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "CNAME_EXISTS=false" >> $GITHUB_ENV
-          fi
-
-      - name: Check if HTTPS is enforced
+      - name: Check CNAME and HTTPS enforcement
         id: check-https
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -62,7 +47,14 @@ jobs:
         run: |
           OWNER=$(echo $REPO | awk -F'/' '{print $1}')
           REPO_NAME=$(echo $REPO | awk -F'/' '{print $2}')
-          HTTPS_ENFORCED=$(curl -s -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$OWNER/$REPO_NAME/pages | jq -r '.enforce_https')
+          RESPONSE=$(curl -L -s -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$OWNER/$REPO_NAME/pages)
+          CNAME=$(echo $RESPONSE | jq -r '.cname')
+          HTTPS_ENFORCED=$(echo $RESPONSE | jq -r '.https_enforced')
+          if [ "$CNAME" != "null" ]; then
+            echo "CNAME_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "CNAME_EXISTS=false" >> $GITHUB_ENV
+          fi
           if [ "$HTTPS_ENFORCED" == "true" ]; then
             echo "HTTPS_ENFORCED=true" >> $GITHUB_ENV
           else
