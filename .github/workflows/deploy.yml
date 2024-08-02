@@ -58,6 +58,7 @@ jobs:
           publish_dir: build
           force_orphan: true
           allow_empty_commit: true
+          cname: mypage9.hbrown-test.com
 
       - name: Set Custom Domain
         shell: bash
