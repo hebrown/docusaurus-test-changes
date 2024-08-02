@@ -58,7 +58,17 @@ jobs:
           publish_dir: build
           force_orphan: true
           allow_empty_commit: true
-          cname: mypage9.hbrown-test.com
+
+      - name: Set Custom Domain
+        shell: bash
+        run: |
+          echo "Setting Custom Domain"
+          curl -L \
+            -X PUT \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GHP_DEPLOY_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pages \
+            -d '{"cname":"mypage9.hbrown-test.com"}
 
       - name: Enable Enforce HTTPS
         if: env.HTTPS_ENFORCED == 'false'
