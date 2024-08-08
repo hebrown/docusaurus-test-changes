@@ -24,6 +24,7 @@ jobs:
       - name: Check for CNAME file in gh-pages branch
         id: check_cname
         run: |
+          git fetch origin gh-pages
           git checkout gh-pages
           if [ -f CNAME ]; then
             echo "CNAME file exists"
