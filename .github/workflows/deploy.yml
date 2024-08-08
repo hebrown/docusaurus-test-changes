@@ -75,14 +75,32 @@ jobs:
       - name: Set Custom Domain
         shell: bash
         if: env.CNAME_EXISTS == 'false'
+        env:
+          DOMAIN_TOKEN: ${{ secrets.GHP_DEPLOY_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
-          echo "Setting Custom Domain"
-          curl -L \
-            -X PUT \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GHP_DEPLOY_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/pages \
-            -d '{"cname":"mypage14.hbrown-test.com"}'
+          MAX_RETRIES=30
+          RETRY_INTERVAL=30
+          for ((i=1; i<=MAX_RETRIES; i++)); do
+            echo "Attempt $i to set custom domain"
+            HTTP_STATUS=$(curl -L -s -o response.json -w "%{http_code}" \
+              -X PUT \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $DOMAIN_TOKEN" \
+              https://api.github.com/repos/${REPO}/pages \
+              -d '{"cname":"mypage14.hbrown-test.com"}')
+            if [[ "$HTTP_STATUS" == "204" ]]; then
+              echo "Custom domain set successfully"
+              break
+            else
+              echo "Setting custom domain failed with status $HTTP_STATUS. Retrying in $RETRY_INTERVAL seconds..."
+              sleep $RETRY_INTERVAL
+            fi
+          done
+          if [[ "$HTTP_STATUS" != "204" ]]; then
+            echo "Failed to set custom domain after $MAX_RETRIES attempts."
+            exit 1
+          fi
 
       - name: Enable Enforce HTTPS
         if: env.HTTPS_ENFORCED == 'false'
