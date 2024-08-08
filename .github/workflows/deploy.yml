@@ -39,18 +39,6 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn build
 
-      - name: Set custom CNAME
-        id: set-cname
-        run: echo "PAGE_CNAME=$(echo '${{ github.repository }}' | awk -F'/' '{print $2}').hbrown-test.com" >> $GITHUB_ENV
-      
-      - name: Set CNAME value
-        run: |
-          if [ "$CNAME_EXISTS" == "true" ]; then
-            echo "CNAME=mypage14.hbrown-test.com" >> $GITHUB_ENV
-          else
-            echo "CNAME=" >> $GITHUB_ENV
-          fi
-
       - name: Check CNAME and HTTPS enforcement
         id: check-https
         env:
@@ -60,6 +48,14 @@ jobs:
           RESPONSE=$(curl -L -s -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/${{ github.repository }}/pages)
           echo "CNAME_EXISTS=$(echo $RESPONSE | jq -r '.cname != null')" >> $GITHUB_ENV
           echo "HTTPS_ENFORCED=$(echo $RESPONSE | jq -r '.https_enforced')" >> $GITHUB_ENV
+      
+      - name: Set CNAME value
+        run: |
+          if [ "${{ env.CNAME_EXISTS }}" == "true" ]; then
+            echo "CNAME=mypage14.hbrown-test.com" >> $GITHUB_ENV
+          else
+            echo "CNAME=" >> $GITHUB_ENV
+          fi
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
@@ -70,6 +66,11 @@ jobs:
           force_orphan: true
           allow_empty_commit: true
           cname: ${{ env.CNAME }}
+      
+      - name: Check if CNAME is set
+        run: |
+          echo "CNAME value is ${{ env.CNAME_EXISTS}}"
+          echo "HTTPS_ENFORCED is ${{ env.HTTPS_ENFORCED}}"
 
       - name: Set Custom Domain
         shell: bash
