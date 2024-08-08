@@ -74,7 +74,7 @@ jobs:
 
       - name: Set Custom Domain
         shell: bash
-        if: ${{ env.CNAME_EXISTS }} == 'false'
+        if: env.CNAME_EXISTS == 'false'
         run: |
           echo "Setting Custom Domain"
           curl -L \
@@ -85,7 +85,7 @@ jobs:
             -d '{"cname":"mypage14.hbrown-test.com"}'
 
       - name: Enable Enforce HTTPS
-        if: ${{ env.HTTPS_ENFORCED }} == 'false'
+        if: env.HTTPS_ENFORCED == 'false'
         env:
           HTTPS_TOKEN: ${{ secrets.GHP_DEPLOY_TOKEN }}
           REPO: ${{ github.repository }}
