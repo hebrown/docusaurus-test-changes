@@ -42,6 +42,14 @@ jobs:
       - name: Set custom CNAME
         id: set-cname
         run: echo "PAGE_CNAME=$(echo '${{ github.repository }}' | awk -F'/' '{print $2}').hbrown-test.com" >> $GITHUB_ENV
+      
+      - name: Set CNAME value
+        run: |
+          if [ "$CNAME_EXISTS" == "true" ]; then
+            echo "CNAME=mypage14.hbrown-test.com" >> $GITHUB_ENV
+          else
+            echo "CNAME=" >> $GITHUB_ENV
+          fi
 
       - name: Check CNAME and HTTPS enforcement
         id: check-https
@@ -61,7 +69,7 @@ jobs:
           publish_dir: build
           force_orphan: true
           allow_empty_commit: true
-          cname: mypage14.hbrown-test.com
+          cname: ${{ env.CNAME }}
 
       - name: Set Custom Domain
         shell: bash
