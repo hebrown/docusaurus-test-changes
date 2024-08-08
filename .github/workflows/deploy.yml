@@ -103,7 +103,7 @@ jobs:
           fi
 
       - name: Enable Enforce HTTPS
-        if: env.HTTPS_ENFORCED == 'false'
+        if: env.HTTPS_ENFORCED != 'true'
         env:
           HTTPS_TOKEN: ${{ secrets.GHP_DEPLOY_TOKEN }}
           REPO: ${{ github.repository }}
