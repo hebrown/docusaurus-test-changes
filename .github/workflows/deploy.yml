@@ -21,6 +21,19 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Check for CNAME file in gh-pages branch
+        id: check_cname
+        run: |
+          git checkout gh-pages
+          if [ -f CNAME ]; then
+            echo "CNAME file exists"
+            echo "cname_exists=true" >> $GITHUB_ENV
+          else
+            echo "CNAME file does not exist"
+            echo "cname_exists=false" >> $GITHUB_ENV
+          fi
+          git checkout main
+
       - name: Get yarn cache
         id: yarn-cache
         run: echo "YARN_CACHE_DIR=$(yarn cache dir)" >> "${GITHUB_OUTPUT}"
