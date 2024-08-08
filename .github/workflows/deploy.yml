@@ -21,20 +21,6 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Check for CNAME file in gh-pages branch
-        id: check_cname
-        run: |
-          git fetch origin gh-pages
-          git checkout gh-pages
-          if [ -f CNAME ]; then
-            echo "CNAME file exists"
-            echo "cname_exists=true" >> $GITHUB_ENV
-          else
-            echo "CNAME file does not exist"
-            echo "cname_exists=false" >> $GITHUB_ENV
-          fi
-          git checkout main
-
       - name: Get yarn cache
         id: yarn-cache
         run: echo "YARN_CACHE_DIR=$(yarn cache dir)" >> "${GITHUB_OUTPUT}"
@@ -67,7 +53,6 @@ jobs:
           echo "CNAME_EXISTS=$(echo $RESPONSE | jq -r '.cname != null')" >> $GITHUB_ENV
           echo "HTTPS_ENFORCED=$(echo $RESPONSE | jq -r '.https_enforced')" >> $GITHUB_ENV
 
-
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
@@ -76,10 +61,11 @@ jobs:
           publish_dir: build
           force_orphan: true
           allow_empty_commit: true
-          cname: mypage9.hbrown-test.com
+          cname: mypage14.hbrown-test.com
 
       - name: Set Custom Domain
         shell: bash
+        if: ${{ env.CNAME_EXISTS }} == 'false'
         run: |
           echo "Setting Custom Domain"
           curl -L \
@@ -87,10 +73,10 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GHP_DEPLOY_TOKEN }}" \
             https://api.github.com/repos/${{ github.repository }}/pages \
-            -d '{"cname":"mypage9.hbrown-test.com"}'
+            -d '{"cname":"mypage14.hbrown-test.com"}'
 
       - name: Enable Enforce HTTPS
-        if: env.HTTPS_ENFORCED == 'false'
+        if: ${{ env.HTTPS_ENFORCED }} == 'false'
         env:
           HTTPS_TOKEN: ${{ secrets.GHP_DEPLOY_TOKEN }}
           REPO: ${{ github.repository }}
