@@ -52,7 +52,7 @@ jobs:
       - name: Set CNAME value
         run: |
           if [ "${{ env.CNAME_EXISTS }}" == "true" ]; then
-            echo "CNAME=mypage14.hbrown-test.com" >> $GITHUB_ENV
+            echo "CNAME=mypage15.hbrown-test.com" >> $GITHUB_ENV
           else
             echo "CNAME=" >> $GITHUB_ENV
           fi
@@ -88,7 +88,7 @@ jobs:
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer $DOMAIN_TOKEN" \
               https://api.github.com/repos/${REPO}/pages \
-              -d '{"cname":"mypage14.hbrown-test.com"}')
+              -d '{"cname":"mypage15.hbrown-test.com"}')
             if [[ "$HTTP_STATUS" == "204" ]]; then
               echo "Custom domain set successfully"
               break
